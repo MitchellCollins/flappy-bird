@@ -5,26 +5,40 @@ import { useEffect, useRef } from "react";
 export default function Home() {
   const canvasRef = useRef(null);
 
-  // Defines global variables
+  // Gloabl constants
   const fps = 30;
-  let score = 0;
   const boardWidth = 600;
   const boardHeight = 600;
   const gravityStrength = 1;
-  let speed = 3;
-  let speedupDelay = 10000;
+  const speedupDelay = 10000;
   const birdXPosition = boardWidth / 6;
-  let birdYPosition = boardHeight / 2;
-  let birdYVelocity = 0;
   const pipeGap = 150;
   const pipeMin = 50;
   const pipeDistance = 250;
+  const groundYPosition = boardHeight - boardHeight / 6;
+  const grounds = [];
+
+  // Defines global variables initial values
+  const initialValues = {
+    score: 0,
+    speed: 3,
+    birdYPosition: boardHeight / 2,
+    birdYVelocity: 0,
+    // A function that returns the initial value for pipes
+    // Had to do it this way as objects go by reference
+    // So if global pipes was changed then the initial value of pipes was also changed
+    getPipes: () => []
+  }
+
+  // Gloabl variables
+  let score = initialValues.score;
+  let speed = initialValues.speed;
+  let birdYPosition = initialValues.birdYPosition;
+  let birdYVelocity = initialValues.birdYVelocity;
   // distance = speed * fps * pipeDelay
   // pipeDelay = distance / (speed * fps)
   let pipeDelay = (pipeDistance / (speed * fps)) * 1000; // Converts to milliseconds
-  const pipes = [];
-  const groundYPosition = boardHeight - boardHeight / 6;
-  const grounds = [];
+  let pipes = initialValues.getPipes();
 
   useEffect(() => {
     if (canvasRef.current === null) return;
@@ -35,6 +49,8 @@ export default function Home() {
     // Defines Images
     const message = new Image();
     message.src = "/images/message.png";
+    const gameover = new Image();
+    gameover.src = "/images/gameover.png";
     const ground = new Image();
     ground.src = "/images/base.png";
     const bird = new Image();
@@ -60,6 +76,7 @@ export default function Home() {
       // Waits till all images have loaded
       await Promise.all([
         loadImage(message),
+        loadImage(gameover),
         loadImage(ground),
         loadImage(bird),
         loadImage(pipe)
@@ -181,6 +198,13 @@ export default function Home() {
       // Add event listeners to flap
       window.addEventListener("keypress", handleFlap);
       canvas.addEventListener("click", handleFlap);
+
+      // Resets global variable initial values
+      score = initialValues.score;
+      speed = initialValues.speed;
+      birdYPosition = initialValues.birdYPosition;
+      birdYVelocity = initialValues.birdYVelocity;
+      pipes = initialValues.getPipes();
       
       // Defines interval that increases speed
       const speedupInterval = setInterval(() => {
@@ -252,8 +276,23 @@ export default function Home() {
           clearInterval(speedupInterval);
           window.removeEventListener("keypress", handleFlap);
           canvas.removeEventListener("click", handleFlap);
+
+          // Draws Game Over Image
+          context.drawImage(gameover, (boardWidth / 2) - (gameover.width / 2), boardHeight / 6);
+
+          // Draws Score Text
+          context.fillStyle = "#fff";
+          context.font = "30px Arial";
+          context.textAlign = "center";
+          context.fillText(`Score: ${score}`, boardWidth / 2, boardHeight / 3);
+
+          // Readds start game event listeners
+          window.addEventListener("keypress", game);
+          canvas.addEventListener("click", game);
+
+          return;
         }
-        
+      
         draw();
       }, 1000 / fps);
     }
