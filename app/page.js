@@ -33,9 +33,12 @@ export default function Home() {
     const context = canvas.getContext("2d");
 
     // Defines Images
+    const message = new Image();
+    message.src = "/images/message.png";
     const ground = new Image();
     ground.src = "/images/base.png";
     const bird = new Image();
+    bird.src = "/images/redbird-upflap.png";
     const pipe = new Image();
     pipe.src = "/images/pipe-green.png";
 
@@ -44,11 +47,33 @@ export default function Home() {
     const pointAudio = new Audio("/audio/point.wav");
     const wingAudio = new Audio("/audio/wing.wav");
 
+    // Used to load single image
+    function loadImage(image) {
+      return new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = () => reject(new Error(`Failed to Load: ${image.src}`));
+      });
+    }
+
+    // Calls a callback function when all images have loaded
+    async function onImagesLoad(callback) {
+      // Waits till all images have loaded
+      await Promise.all([
+        loadImage(message),
+        loadImage(ground),
+        loadImage(bird),
+        loadImage(pipe)
+      ]);
+
+      callback();
+    }
+
     function createGround() {
       if (grounds.length === 0) {
         for (let i = 0; ground.width * i <= boardWidth; i++) {
           grounds.push(ground.width * i);
         }
+        return;
       }
 
       // Checks the current grounds fulfill the board width
@@ -106,6 +131,16 @@ export default function Home() {
       return birdYPosition <= 0 || birdYPosition + bird.width >= groundYPosition;
     }
 
+    function drawBird() {
+      context.drawImage(bird, birdXPosition, birdYPosition);
+    }
+
+    function drawGround() {
+      for (let i = 0; i < grounds.length; i++) {
+        context.drawImage(ground, grounds[i], groundYPosition);
+      }
+    }
+
     function draw() {
       context.reset();
 
@@ -129,13 +164,8 @@ export default function Home() {
         context.drawImage(pipe, pipeEl.x, boardHeight - pipeEl.bottomHeight);
       }
 
-      // Draws Ground
-      for (let i = 0; i < grounds.length; i++) {
-        context.drawImage(ground, grounds[i], groundYPosition);
-      }
-
-      // Draws Bird
-      context.drawImage(bird, birdXPosition, birdYPosition);
+      drawGround();
+      drawBird();
 
       // Draws Score
       context.fillStyle = "#fff";
@@ -144,6 +174,14 @@ export default function Home() {
     }
 
     function game() {
+      // Removes start game event listeners
+      window.removeEventListener("keypress", game);
+      canvas.removeEventListener("click", game);
+      
+      // Add event listeners to flap
+      window.addEventListener("keypress", handleFlap);
+      canvas.addEventListener("click", handleFlap);
+      
       // Defines interval that increases speed
       const speedupInterval = setInterval(() => {
         // distance = speed * fps * pipeDelay
@@ -213,16 +251,25 @@ export default function Home() {
           clearInterval(loop);
           clearInterval(speedupInterval);
           window.removeEventListener("keypress", handleFlap);
+          canvas.removeEventListener("click", handleFlap);
         }
         
         draw();
       }, 1000 / fps);
     }
 
-    // Flappy Button "space"
-    window.addEventListener("keypress", handleFlap);
+    // Draws start menu
+    // Event listener to start game
+    // Triggers when last image is loaded
+    onImagesLoad(() => {
+      context.drawImage(message, (boardWidth / 2) - (message.width / 2), boardHeight / 6);
+      createGround();
+      drawGround();
+      drawBird();
 
-    game();
+      window.addEventListener("keypress", game);
+      canvas.addEventListener("click", game);
+    });
   }, []);
   
   return (
