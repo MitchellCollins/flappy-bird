@@ -144,25 +144,17 @@ export default function Home() {
     }
 
     function game() {
-      // Defines create pipe interval
-      let createPipInterval = setInterval(createPipe, pipeDelay);
-
       // Defines interval that increases speed
       const speedupInterval = setInterval(() => {
-        // Note: The calculation may be off as the distances grows or it can be due to the load time
-        // TODO: Change createPipe from an interval to a condition in the game loop
         // distance = speed * fps * pipeDelay
         // pipeDelay = distance / (speed * fps)
         speed += 0.25;
         speed = Math.min(5, speed);
 
         pipeDelay = (pipeDistance / (speed * fps)) * 1000; // Converts to milliseconds
-        //pipeDelay = Math.max(250, pipeDelay);
-
-        // Refreshed create pipe interval delay
-        createPipInterval = setInterval(createPipe, pipeDelay);
-        clearInterval(createPipInterval);
       }, speedupDelay);
+
+      let lastPipeTime = new Date().getTime();
       
       // Game Loop
       const loop = setInterval(() => {
@@ -177,6 +169,13 @@ export default function Home() {
 
         else
           bird.src = "/images/redbird-upflap.png";
+
+        // Creates Pipe with time has passed
+        const now = new Date().getTime();
+        if (now - lastPipeTime >= pipeDelay) {
+          createPipe();
+          lastPipeTime = now;
+        }
 
         // Updates Pipes
         for (let i = 0; i < pipes.length; i++) {
@@ -212,7 +211,6 @@ export default function Home() {
         if (hasCollided()) {
           hitAudio.play();
           clearInterval(loop);
-          clearInterval(createPipInterval);
           clearInterval(speedupInterval);
           window.removeEventListener("keypress", handleFlap);
         }
