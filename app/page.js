@@ -31,7 +31,6 @@ export default function Home() {
     score: 0,
     speed: 3,
     birdYPosition: boardHeight / 2,
-    birdYVelocity: 0,
     // A function that returns the initial value for pipes
     // Had to do it this way as objects go by reference
     // So if global pipes was changed then the initial value of pipes was also changed
@@ -42,7 +41,7 @@ export default function Home() {
   let score = initialValues.score;
   let speed = initialValues.speed;
   let birdYPosition = initialValues.birdYPosition;
-  let birdYVelocity = initialValues.birdYVelocity;
+  let birdYVelocity = 0;
   // distance = speed * fps * pipeDelay
   // pipeDelay = distance / (speed * fps)
   let pipeDelay = (pipeDistance / (speed * fps)) * 1000; // Converts to milliseconds
@@ -204,16 +203,11 @@ export default function Home() {
       // Removes start game event listeners
       window.removeEventListener("keypress", game);
       canvas.removeEventListener("click", game);
-      
-      // Add event listeners to flap
-      window.addEventListener("keypress", handleFlap);
-      canvas.addEventListener("click", handleFlap);
 
       // Resets global variable initial values
       score = initialValues.score;
       speed = initialValues.speed;
       birdYPosition = initialValues.birdYPosition;
-      birdYVelocity = initialValues.birdYVelocity;
       pipes = initialValues.getPipes();
       
       // Defines interval that increases speed
@@ -284,8 +278,6 @@ export default function Home() {
           hitAudio.play();
           clearInterval(loop);
           clearInterval(speedupInterval);
-          window.removeEventListener("keypress", handleFlap);
-          canvas.removeEventListener("click", handleFlap);
 
           // Updates High Score
           if (highScore === null || score > highScore) {
@@ -335,8 +327,13 @@ export default function Home() {
       drawGround();
       drawBird();
 
+      // Event listeners to start game
       window.addEventListener("keypress", game);
       canvas.addEventListener("click", game);
+
+      // Add event listeners to flap
+      window.addEventListener("keypress", handleFlap);
+      canvas.addEventListener("click", handleFlap);
     });
   }, []);
   
