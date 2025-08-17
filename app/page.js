@@ -10,6 +10,22 @@ function resolveSRCPath(path) {
   return (isProd ? "/flappy-bird" : "") + path;
 }
 
+// Used to load single image
+function loadImage(image) {
+  return new Promise((resolve, reject) => {
+    image.onload = resolve;
+    image.onerror = () => reject(new Error(`Failed to Load: ${image.src}`));
+  });
+}
+
+// Calls a callback function when all images have loaded
+async function onImagesLoad(images, callback) {
+  // Waits till all images have loaded
+  await Promise.all(images.map(loadImage));
+
+  callback();
+}
+
 export default function Home() {
   const canvasRef = useRef(null);
 
@@ -71,28 +87,6 @@ export default function Home() {
     const wingAudio = new Audio(resolveSRCPath("/audio/wing.wav"));
 
     let highScore = window.localStorage.getItem("high_score") || null;
-
-    // Used to load single image
-    function loadImage(image) {
-      return new Promise((resolve, reject) => {
-        image.onload = resolve;
-        image.onerror = () => reject(new Error(`Failed to Load: ${image.src}`));
-      });
-    }
-
-    // Calls a callback function when all images have loaded
-    async function onImagesLoad(callback) {
-      // Waits till all images have loaded
-      await Promise.all([
-        loadImage(message),
-        loadImage(gameover),
-        loadImage(ground),
-        loadImage(bird),
-        loadImage(pipe)
-      ]);
-
-      callback();
-    }
 
     function createGround() {
       if (grounds.length === 0) {
@@ -309,8 +303,8 @@ export default function Home() {
 
     // Draws start menu
     // Event listener to start game
-    // Triggers when last image is loaded
-    onImagesLoad(() => {
+    // Triggers when images have loaded
+    onImagesLoad([message, gameover, ground, bird, pipe], () => {
       // Draw Start Menu Image
       context.drawImage(message, (boardWidth / 2) - (message.width / 2), boardHeight / 6);
 
