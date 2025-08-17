@@ -2,6 +2,14 @@
 
 import { useEffect, useRef } from "react";
 
+// Determines if is being runned in production
+const isProd = process.env.NODE_ENV === "production";
+// Used to change src paths when in production
+// Because with github the url is changed as it has an addition /flappy-bird as that is its repository
+function resolveSRCPath(path) {
+  return (isProd ? "/flappy-bird" : "") + path;
+}
+
 export default function Home() {
   const canvasRef = useRef(null);
 
@@ -48,20 +56,20 @@ export default function Home() {
 
     // Defines Images
     const message = new Image();
-    message.src = "/images/message.png";
+    message.src = resolveSRCPath("/images/message.png");
     const gameover = new Image();
-    gameover.src = "/images/gameover.png";
+    gameover.src = resolveSRCPath("/images/gameover.png");
     const ground = new Image();
-    ground.src = "/images/base.png";
+    ground.src = resolveSRCPath("/images/base.png");
     const bird = new Image();
-    bird.src = "/images/redbird-upflap.png";
+    bird.src = resolveSRCPath("/images/redbird-upflap.png");
     const pipe = new Image();
-    pipe.src = "/images/pipe-green.png";
+    pipe.src = resolveSRCPath("/images/pipe-green.png");
 
     // Defines Audio
-    const hitAudio = new Audio("/audio/hit.wav");
-    const pointAudio = new Audio("/audio/point.wav");
-    const wingAudio = new Audio("/audio/wing.wav");
+    const hitAudio = new Audio(resolveSRCPath("/audio/hit.wav"));
+    const pointAudio = new Audio(resolveSRCPath("/audio/point.wav"));
+    const wingAudio = new Audio(resolveSRCPath("/audio/wing.wav"));
 
     let highScore = window.localStorage.getItem("high_score") || null;
 
@@ -229,10 +237,10 @@ export default function Home() {
         // Changes bird image based of if it is flapping
         // Checks if bird is ascending
         if (birdYVelocity < 0)
-          bird.src = "/images/redbird-downflap.png";
+          bird.src = resolveSRCPath("/images/redbird-downflap.png");
 
         else
-          bird.src = "/images/redbird-upflap.png";
+          bird.src = resolveSRCPath("/images/redbird-upflap.png");
 
         // Creates Pipe with time has passed
         const now = new Date().getTime();
@@ -338,7 +346,7 @@ export default function Home() {
         ref={canvasRef}
         width={boardWidth} 
         height={boardHeight} 
-        style={{ backgroundImage: "url(/images/background-day.png)" }} 
+        style={{ backgroundImage: `url(${resolveSRCPath("/images/background-day.png")})` }} 
       />
     </div>
   );
