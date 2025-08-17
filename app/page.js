@@ -148,13 +148,13 @@ export default function Home() {
           // Checks the x window
           birdXPosition + bird.width >= pipeEl.x && birdXPosition <= pipeEl.x + pipe.width
           // Checks the y window
-          && (birdYPosition <= pipeEl.topHeight || birdYPosition >= boardHeight - pipeEl.bottomHeight) 
+          && (birdYPosition <= pipeEl.topHeight || birdYPosition + bird.height >= boardHeight - pipeEl.bottomHeight) 
         )
           return true;
       }
       
       // Resolve Boundary Collisions
-      return birdYPosition <= 0 || birdYPosition + bird.width >= groundYPosition;
+      return birdYPosition <= 0 || birdYPosition + bird.height >= groundYPosition;
     }
 
     function drawBird() {
@@ -272,6 +272,8 @@ export default function Home() {
 
         // Creates ground
         createGround();
+      
+        draw();
 
         // Checks if bird has collided
         if (hasCollided()) {
@@ -300,11 +302,7 @@ export default function Home() {
           // Readds start game event listeners
           window.addEventListener("keypress", game);
           canvas.addEventListener("click", game);
-
-          return;
         }
-      
-        draw();
       }, 1000 / fps);
     }
 
