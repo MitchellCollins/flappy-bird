@@ -63,6 +63,8 @@ export default function Home() {
     const pointAudio = new Audio("/audio/point.wav");
     const wingAudio = new Audio("/audio/wing.wav");
 
+    let highScore = window.localStorage.getItem("high_score") || null;
+
     // Used to load single image
     function loadImage(image) {
       return new Promise((resolve, reject) => {
@@ -277,14 +279,23 @@ export default function Home() {
           window.removeEventListener("keypress", handleFlap);
           canvas.removeEventListener("click", handleFlap);
 
+          // Updates High Score
+          if (highScore === null || score > highScore) {
+            highScore = score;
+            window.localStorage.setItem("high_score", highScore);
+          }
+
           // Draws Game Over Image
           context.drawImage(gameover, (boardWidth / 2) - (gameover.width / 2), boardHeight / 6);
 
-          // Draws Score Text
+          // Draws Score Texts
           context.fillStyle = "#fff";
           context.font = "30px Arial";
           context.textAlign = "center";
-          context.fillText(`Score: ${score}`, boardWidth / 2, boardHeight / 3);
+          // High Score
+          context.fillText(`High Score: ${highScore}`, boardWidth / 2, boardHeight / 3);
+          // Score
+          context.fillText(`Score: ${score}`, boardWidth / 2, boardHeight / 2.5);
 
           // Readds start game event listeners
           window.addEventListener("keypress", game);
@@ -301,7 +312,17 @@ export default function Home() {
     // Event listener to start game
     // Triggers when last image is loaded
     onImagesLoad(() => {
+      // Draw Start Menu Image
       context.drawImage(message, (boardWidth / 2) - (message.width / 2), boardHeight / 6);
+
+      // Draw high score text
+      if (highScore !== null) {
+        context.fillStyle = "#fff";
+        context.font = "30px Arial";
+        context.textAlign = "center";
+        context.fillText(`High Score: ${highScore}`, boardWidth / 2, boardHeight - boardHeight / 3);
+      }
+
       createGround();
       drawGround();
       drawBird();
