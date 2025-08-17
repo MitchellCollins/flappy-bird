@@ -131,8 +131,9 @@ export default function Home() {
     }
 
     function handleFlap(e) {
+      // Checks if it isn't a click type event
       // Checks if it isn't a space bar keypress
-      if (e.keyCode !== 32) return;
+      if (e.type !== "click" && e.keyCode !== 32) return;
 
       wingAudio.play();
       birdYVelocity = -12;
