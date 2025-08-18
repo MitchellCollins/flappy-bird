@@ -53,14 +53,18 @@ export default function Home() {
     getPipes: () => []
   }
 
+  // The pipeDelay couldn't be define in the initiation of the inititalValues object as it need the speed value
+  // Which couldn't be accessed before the initialisation of the object
+  // distance = speed * fps * pipeDelay
+  // pipeDelay = distance / (speed * fps)
+  initialValues.pipeDelay = (pipeDistance / (initialValues.speed * fps)) * 1000; // Converts to milliseconds
+
   // Gloabl variables
   let score = initialValues.score;
   let speed = initialValues.speed;
   let birdYPosition = initialValues.birdYPosition;
   let birdYVelocity = 0;
-  // distance = speed * fps * pipeDelay
-  // pipeDelay = distance / (speed * fps)
-  let pipeDelay = (pipeDistance / (speed * fps)) * 1000; // Converts to milliseconds
+  let pipeDelay = initialValues.pipeDelay;
   let pipes = initialValues.getPipes();
 
   useEffect(() => {
@@ -203,6 +207,7 @@ export default function Home() {
       score = initialValues.score;
       speed = initialValues.speed;
       birdYPosition = initialValues.birdYPosition;
+      pipeDelay = initialValues.pipeDelay;
       pipes = initialValues.getPipes();
       
       // Defines interval that increases speed
